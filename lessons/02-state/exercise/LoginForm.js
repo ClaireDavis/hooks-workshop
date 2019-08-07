@@ -8,8 +8,37 @@ import { login } from "app/utils"
 // export default LoginFormFinal
 
 export default function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword)
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault()
+
+    setIsLoading(true)
+
+    const [emailNode, passwordNode] = event.target.elements
+    login(emailNode.value, passwordNode.value)
+      .catch(error => {
+        setIsLoading(false)
+        setError(error)
+      })
+  }
+
   return (
-    <form>
+    < form onSubmit={handleSubmit}>
+      {error && (
+        <div style={{ color: "red" }}>
+          <p>Oops, there was an error logging you in.</p>
+          <p>
+            <i>{error.message}</i>
+          </p>
+        </div>
+      )}
       <VisuallyHidden>
         <label htmlFor="login:email">Email:</label>
       </VisuallyHidden>
@@ -25,7 +54,7 @@ export default function LoginForm() {
       </VisuallyHidden>
       <input
         id="login:password"
-        type="password"
+        type={showPassword ? "text" : "password"}
         className="inputField"
         placeholder="Password"
       />
@@ -35,6 +64,9 @@ export default function LoginForm() {
           <input
             className="passwordCheckbox"
             type="checkbox"
+            onClick={() => {
+              handleShowPassword()
+            }}
             defaultChecked={false}
           />{" "}
           show password
@@ -42,9 +74,9 @@ export default function LoginForm() {
       </div>
 
       <TabsButton>
-        <FaSignInAlt />
-        <span>Login</span>
+        {!isLoading && <FaSignInAlt />}
+        <span>{isLoading ? "Loading..." : "Login"}</span>
       </TabsButton>
-    </form>
+    </form >
   )
 }
